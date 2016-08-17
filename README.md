@@ -18,7 +18,11 @@ File & Directory Information
 
 * [`static/`](static/)
     
-    This folder is required by [Flask] and it is where all "static" files live, like things for [CSS] or images or fonts or [HTML] templates.
+    This folder is required by [Flask] and it is where all "static" files live, like things for [CSS] or images or fonts.
+
+* [`templates/`](templates/)
+    
+    This is another folder required by [Flask], and it stores all of the [HTML] code that builds the markup of the website.
 
 * [`schema.sql`](schema.sql)    
     
@@ -33,6 +37,9 @@ File & Directory Information
     
     This is actual source code of the web application. __! Remember, it is _not_ what you will actually run to deploy the server; the [`setup.sh`](setup.sh) script will take it and configure it, to create a new, functional `server.py` which is what you will run when you deploy.__
 
+* [`clean.sh`](clean.sh)
+    
+    This is just a one-liner script that just gets rid of the created `server.py` and the private keys created for use with [HTTPS].
 
 
 [Python]: https://www.python.org/
@@ -41,3 +48,4 @@ File & Directory Information
 [bash]: https://en.wikipedia.org/wiki/Bash_(Unix_shell)
 [CSS]: https://www.w3.org/Style/CSS/Overview.en.html
 [HTML]: https://en.wikipedia.org/wiki/HTML
+[HTTPS:]: https://en.wikipedia.org/wiki/HTTPS

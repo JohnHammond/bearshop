@@ -8,7 +8,6 @@
 
 # Optional variables: this should be modified by the commandline arguments
 DATABASE=""
-CONFIGURATION=""
 
 # Internal variables; do not edit.
 DEPENDENCIES="python-pip sqlite3 python-flask python-passlib"
@@ -150,12 +149,6 @@ if [ "$DATABASE" == "" ]; then
 	exit -1
 fi
 
-# Make sure we entered a configuration file
-if [ "$CONFIGURATION" == "" ]; then
-	echo "$0: ${RED}you must specify a configuration file!${NC}"
-	display_help
-	exit -1
-fi
 
 # This makes it so every function has a "pre-declaration" of all the functions
 main "$@"
