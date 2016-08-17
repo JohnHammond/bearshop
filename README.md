@@ -12,9 +12,9 @@ I plan to do this project in [Python] with [Flask].
 File & Directory Information
 ----------------
 
-* [`skeleton/`](skeleton/)
+* [`ctf_skeleton/`](ctf_skeleton/)
     
-    This directory holds some code from a recent CTF platform I tried to build on my own. I am using elements from it, so I just snagged to code to be able to cherry-pick off of it and change what I need to get this project rolling.
+    This directory holds some code from a recent CTF platform I tried to build on my own. I am using elements from it, so I just snagged to code to be able to cherry-pick off of it and change what I need to get this project rolling. __Do not consider it a part of this project; it is _not_. It is just included as a convenience for me while the BearShop project is still be developed.__
 
 * [`schema.sql`](schema.sql)    
     
@@ -22,7 +22,8 @@ File & Directory Information
 
 * [`setup.sh`](setup.sh)    
     
-    This is the [`bash`][bash] script that I planned on using to initially create the server. It sets up the database, creates private keys to be used, and modifies a "base" rendition of the server [Python] script to add all of the configuration variables that can be set _in the [`setup.sh`](setup,sh)_ script.
+    This is the [`bash`][bash] script that I planned on using to initially create the server. It sets up the database, creates private keys to be used, and modifies a "base" rendition of the server [Python] script to add all of the configuration variables that can be set _in the_ [`setup.sh`](setup.sh) script.
+
 
 
 
