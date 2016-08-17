@@ -1,0 +1,109 @@
+html{
+	height: 100%;
+	width: 100%;
+}
+
+
+@font-face {
+	font-family: 'Share Tech';
+	src: url('../fonts/Share Tech.ttf');
+}
+
+body{
+	font-family: 'Share Tech';
+	
+	margin: 0px 0px;
+	padding: 0px 0px;
+	background-color: gray;
+
+    /* Permalink - use to edit and share this gradient: http://colorzilla.com/gradient-editor/#0043af+0,0056ce+46,ffb76b+52,ffa73d+57,ff7c00+88,ff7f04+100 */
+background: #0043af; /* Old browsers */
+background: -moz-linear-gradient(top, #0043af 0%, #0056ce 46%, #ffb76b 52%, #ffa73d 57%, #ff7c00 88%, #ff7f04 100%); /* FF3.6-15 */
+background: -webkit-linear-gradient(top, #0043af 0%,#0056ce 46%,#ffb76b 52%,#ffa73d 57%,#ff7c00 88%,#ff7f04 100%); /* Chrome10-25,Safari5.1-6 */
+background: linear-gradient(to bottom, #0043af 0%,#0056ce 46%,#ffb76b 52%,#ffa73d 57%,#ff7c00 88%,#ff7f04 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
+filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#0043af', endColorstr='#ff7f04',GradientType=0 ); /* IE6-9 */
+}
+
+
+#login_box_background{
+	    max-width: 600px;
+		max-height: 400px;
+		
+		padding: 2%;
+
+		position: absolute;
+	    top:0;
+	    bottom: 0;
+	    left: 0;
+	    right: 0;
+
+	    margin: auto;
+	    background-color: white;
+	    opacity: .1;
+
+}
+
+#login_box{
+	/*font-family: 'Share Tech';*/
+	/*background-color: white;*/
+	color: white;
+    font-size: larger;
+	/*margin-top: 30%;*/
+	border-top: 1px solid black;
+	border-bottom: 1px solid black;
+	max-width: 600px;
+	max-height: 400px;
+	
+	padding: 2%;
+
+	position: absolute;
+    top:0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+
+    margin: auto;
+
+	/*width: 100%;*/
+
+	/*padding: 10%;*/
+}
+input{
+	display: block;
+	margin:auto;
+	width: 90%;
+	height: 40px;
+	font-size: x-large;
+    padding: 5px;
+}
+h1{
+
+    border-bottom: 1px solid white;
+}
+#login{
+
+	text-transform: uppercase;
+	text-align: center;
+	width: 95%;
+	height: 60px;
+	background-color: red;
+    border: none;
+	display: block;
+    font-family: 'Share Tech';
+	font-size: xx-large;
+    color: white;
+	/*vertical-align: middle;*/
+	margin: 10px;
+}
+#register{
+	text-transform: uppercase;
+	text-align: center;
+	width: 95%;
+	line-height: 60px;
+	background-color: blue;
+	display: block;
+	font-size: xx-large;
+	margin: 10px;
+	/*font-weight: bold;*/
+	/*vertical-align: middle;*/
+}
