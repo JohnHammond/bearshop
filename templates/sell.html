@@ -1,0 +1,29 @@
+{% extends "base_page.html" %}
+{% block content %}
+
+    <div id="text-align:center">
+    <div id="vertical">
+
+        <h1> Sell a Product</h1>
+
+        <div id="sell_box">
+            <form method="POST" enctype="multipart/form-data">
+                <img src="" alt="Upload a picture! (optional)">
+                <br> <br>
+                <input style="display:inline; width:auto;" type="file" name="picture" value="">
+                <p></p>
+                <input type="text" name="name" placeholder="Product Name" value="{{name}}">
+                <p></p>
+                <input style="color:darkgreen" type="text" name="price" placeholder="Price $" value={{price}}>
+                <p></p>
+                <textarea name="description" placeholder="Description of the Product">{{description}}</textarea>
+                <p></p>
+                <input type="submit" value="SELL" style="font-size:xx-large" id="red_button">
+            </form>
+        </div>
+
+    
+        </div>
+    </div>
+{% endblock %}
+    

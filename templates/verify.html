@@ -1,0 +1,23 @@
+{% extends "base_page.html" %}
+{% block content %}
+
+    <div id="login_box_background"></div>
+    <div id="login_box">
+
+        <h1>Verify your Account</h1>
+        <p>
+            Your account, {{session.email}}, still needs to be verified. 
+        </p>    
+        <p>
+            Please check your e-mail and submit the unique identifier that has been sent to you. 
+        </p>    
+        <form method="POST">
+            <input type="text" name="identifier" placeholder="">
+            <input type="submit" value="Submit" id="red_button">
+        </form>
+
+        <a href="{{ url_for('send_verification_link')}}"><span id="blue_button_link">  SEND E-MAIL AGAIN </span></a>
+
+    </div>
+{% endblock %}
+    

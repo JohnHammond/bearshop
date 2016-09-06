@@ -1,0 +1,6 @@
+#!/bin/bash
+
+sudo add-apt-repository -y ppa:linuxgndu/sqlitebrowser
+sudo apt-get update
+sudo apt-get install sqlitebrowser
+echo "The command is: sqlitebrowser"

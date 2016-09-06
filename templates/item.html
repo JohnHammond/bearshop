@@ -1,0 +1,63 @@
+{% extends "base_page.html" %}
+{% block content %}
+        <div id="vertical">
+
+            <h1> {{name}} </h1>
+            <h2> <span style="color:darkgreen">{{ price }}</span> </h2>
+
+            <p>
+                <strong>Seller:</strong> <a href="{{url_for('profile',uuid=seller_uuid)}}">{{ seller }}</a>
+            </p>
+
+            <img id="product_image" src="{{picture}}" alt="No image is available">
+
+            <p>
+                <strong>Description:</strong> {{ description }}
+            </p>
+            <br>
+            <hr><br>
+
+            {% if seller == session.name %}
+            
+                <a href="{{ url_for('edit', uuid=uuid)}}"><span id="darkorange_button_link">  EDIT PRODUCT </span></a>
+            
+            {% else %}
+            
+                {% if session['name'] in interested_people %}
+                    <span id="grey_button_link">  YOU HAVE ALREADY SHOWN INTEREST </span>
+                {% else %}
+
+                <div id="disclaimer">
+                <p>
+                    Note that once you show interest, an e-mail will be sent to the seller noting that you are interested in the product. <b>Any contact information you enter in your profile will be included in this email.</b> </p> 
+                    <h3> Once you show interest in a product, you cannot undo this. An e-mail will be sent and you cannot "take it back". </h3>
+                </div> 
+
+                <a href="{{ url_for('show_interest', seller=seller, uuid=uuid)}}"><span id="green_button_link">  SHOW INTEREST </span></a>
+                {% endif %}
+
+            {% endif %}
+                
+                <br><hr><br>
+
+                <p style="color:teal">
+                    Currently <b>{{ interested_people | length }} 
+                    
+                    {% if interested_people | length  == 1 %}
+                        person</b> is
+                    {% else %}
+                        people</b> are
+                    {% endif %}
+                    
+                    interested in this product.
+                </p>
+                {% if seller == session.name %}
+                    <ul>
+                    {% for person in interested_people %}
+
+                        <li> {{ person }} </li>
+                    {% endfor %}
+                    </ul>
+                {% endif %}
+    </div>
+{% endblock %}

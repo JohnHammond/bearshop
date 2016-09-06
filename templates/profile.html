@@ -1,0 +1,59 @@
+{% extends "base_page.html" %}
+{% block content %}
+
+
+    <!-- <div id="login_box_background"></div> -->
+    <div id="vertical">
+    
+        <h1> {{name}} </h1>
+
+        {% if name == session.name %}
+            <p>
+                To make communication easier once you show interest in some one else's product, you can enter your phone number or room number here. </p>
+            <p>
+                
+                <b>This information will be included in any e-mail sent to notify interest, but it is completely optional for you to supply the information.</b>
+            </p>
+
+            <form method="POST">
+                <input type="text" name="phone" value="{{phone}}" placeholder="Phone: ###-###-####"> 
+                <input type="text" name="room" value="{{room}}" placeholder="Room: ####"> 
+                <input type="submit" value="SAVE CHANGES" id="green_button"> 
+            </form>
+            <br>
+            <hr><br>
+        {% endif %}
+
+        <p> 
+
+        {% if name == session.name %}
+            You are
+        {% else %}
+            {{name}} is 
+        {% endif %}
+        currently selling these products: 
+        </p>
+
+        {% if products|length == 0 %}
+        
+        	<h2 style="color:silver; text-align: center">
+        		Unfortunately, no products...
+        	</h2>
+
+        {% else %}
+
+        	<ul>
+        
+        	{% for product in products %}
+        		<li> <a style="color:blue" href="{{url_for('product', uuid=product[1] ) }}">{{product[0]}} </a> </li>
+
+        	{% endfor %}
+        	
+        	</ul>
+        
+        {% endif %}
+    
+    </div>
+
+
+{% endblock %}

@@ -1,6 +1,7 @@
 {% extends "base_page.html" %}
 {% block content %}
 
+
     <div id="login_box_background"></div>
     <div id="login_box">
 
@@ -9,14 +10,14 @@
             Please login below with your EDU e-mail and your BearShop password.
         </p>
 
-        <form>
-            <input type="text" name="email">
-            <input type="password" name="password">
-            <input type="submit" value="LOGIN" id="login">
+        <form method="POST">
+            <input type="text" name="email" placeholder="E-mail" value="{{email}}">
+            <input type="password" name="password" placeholder="Password">
+            <input type="submit" value="LOGIN" id="red_button">
         </form>
 
-
-        <span id="register"> REGISTER </span>
+        <a href="{{ url_for('register')}}"><span id="blue_button_link">  REGISTER </span></a>
+            
     </div>
 
     

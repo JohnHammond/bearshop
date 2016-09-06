@@ -1,0 +1,19 @@
+{% extends "base_page.html" %}
+{% block content %}
+
+
+    <div id="login_box_background"></div>
+    <div id="login_box">
+    
+        {% for message in get_flashed_messages() %}
+            <p class='flashed_messages'><{{message}}</p>
+        {% endfor %}
+    
+            <h2 style="color:silver; text-align:center">
+                Unfortunately this feature is not yet available.
+            </h2>
+
+
+    </div>
+{% endblock %}
+    

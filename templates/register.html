@@ -1,0 +1,18 @@
+{% extends "base_page.html" %}
+{% block content %}
+
+    <div id="login_box_background"></div>
+    <div id="login_box">
+
+        <h1>Register an Account</h1>
+        <p>
+            To register an account with BearShop, we'll need you to supply your EDU e-mail account and decide on a secure password. 
+        </p>    
+        <form method="POST">
+            <input type="text" name="email" placeholder="E-mail" value="{{email}}">
+            <input type="password" name="password" placeholder="Password" value={{password}}>
+            <input type="password" name="confirm" placeholder="Confirm Password" value="{{confirm}}">
+            <input type="submit" value="REGISTER" id="blue_button">
+        </form>
+    </div>
+{% endblock %}

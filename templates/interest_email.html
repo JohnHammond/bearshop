@@ -1,0 +1,30 @@
+<html>
+	<head></head>
+	<body>
+	 	
+	 	<h2>You got someone's interest on <a href="http://uscgabearshop">
+	 	BearShop!</a></h2>
+
+	 	<p>
+	 		{{name}} showed an interest in your product, "{{product_name}}".
+	 	</p>
+
+	 	<p>
+	 	The contact information that they have made available is as follows:
+	 	</p>
+	 	<ul>
+	 		<li> <b> Email: </b> {{ email }}</li>
+	 		{% if phone %} <li> <b> Phone: </b> {{ phone }}</li> {% endif %}
+	 		{% if room %} <li> <b> Room: </b> {{ room }}</li> {% endif %}
+	 	</ul>
+
+	 	<p>
+	 	Thanks for using <a href="http://uscgabearshop">BearShop!</a> I hope you are enjoying its services. If you have any questions, concerns, or comments, be sure to let me know!
+	 	</p>
+
+
+	 	<p>
+	 	 - John Hammond
+	 	</p>
+	</body>
+</html>

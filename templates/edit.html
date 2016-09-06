@@ -1,0 +1,33 @@
+{% extends "base_page.html" %}
+{% block content %}
+
+    
+        <div id="vertical">
+
+        <h1> Edit Product </h1>
+        <form method="POST" enctype="multipart/form-data">
+            <h1> <input type="text" name="name" value="{{name}}" placeholder="Product Name"> </h1>
+            <h2> <input style="color:darkgreen" type="text" name="price" value="{{price}}" placeholder="Price $"> </h2>
+
+            <p>
+                <strong>Seller:</strong> {{ seller }}
+            </p>
+
+            <img id="product_image" src="{{picture}}" alt="Upload a picture!">
+            <input style="display:inline; width:auto;" type="file" name="picture" value="">
+
+            <p>
+                <strong>Description:</strong> <br>
+                <textarea name="description" placeholder="Description of the Product">{{description}}</textarea>
+            </p>
+            <input type="hidden" name="uuid" value="{{uuid}}">
+            <input type="hidden" name="picture" value="{{picture}}">
+
+            <input type="submit" value="SAVE CHANGES" style="font-size:xx-large" id="green_button">
+        </form>
+
+        <a href="{{ url_for('remove_product', uuid=uuid)}}"><span id="red_button_link">  REMOVE PRODUCT </span></a>
+
+
+    </div>
+{% endblock %}
