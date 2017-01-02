@@ -1,0 +1,26 @@
+{% extends "base_page.html" %}
+{% block content %}
+
+    <div id="vertical">
+        
+        <div style="text-align:center">
+        {% if products|length == 0 %}
+            <h2 style="color:silver; text-align:center">
+                There are currently no rides available. :(
+            </h2>
+        {% else %}
+            {% for ride in rides %}
+                <a href="{{ url_for('ride', uuid=ride[5] )}}">
+                <div class="ride">
+                    <h2> {{ ride[0] }} <span>to {{ ride[1] }} </span>.</h2>
+                    {{ ride[2] }} passengers on {{ ride[3] }}
+                </div></a>
+            {% endfor %}
+
+        {% endif %}
+
+            </div>
+        
+    </div>
+{% endblock %}
+    

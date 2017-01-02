@@ -428,7 +428,10 @@ def edit(uuid):
 							save_location = os.path.join(app.config['UPLOAD_FOLDER'], filename)
 							file.save(save_location)
 							p = Image.open(save_location)
-							p = resizeimage.resize_cover(p, (350, 350))
+							try:
+								p = resizeimage.resize_cover(p, (350, 350))
+							except:
+								pass
 							p.save(save_location)
 							# return redirect(url_for('uploaded_file', filename=filename))
 							picture = (url_for('uploaded_file', filename=filename))
@@ -604,7 +607,10 @@ def sell():
 					save_location = os.path.join(app.config['UPLOAD_FOLDER'], filename)
 					file.save(save_location)
 					p = Image.open(save_location)
-					p = resizeimage.resize_cover(p, (350, 350))
+					try:
+						p = resizeimage.resize_cover(p, (350, 350))
+					except:
+						pass
 					p.save(save_location)
 					# return redirect(url_for('uploaded_file', filename=filename))
 					picture = (url_for('uploaded_file', filename=filename))

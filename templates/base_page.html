@@ -3,8 +3,9 @@
 <html>
     <head>
         <meta charset="utf-8">
-        <title>USCGA BearShop</title>
+        <title>ObjeeTrade</title>
         <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/master.css' ) }}">
+        <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico' ) }}" type="image/x-icon">
         <script src="{{ url_for('static', filename='js/jquery.js' ) }}"></script>
         <script src="{{ url_for('static', filename='js/notify.js' ) }}"></script>
         <script src="{{ url_for('static', filename='js/jquery-ui.min.js' ) }}"></script>
@@ -33,6 +34,10 @@
     {% block content %}
 
     {% endblock %}
+
+    <div style="position:fixed;bottom:10px;width:100%;text-align:center;color:rgba(0,0,0,.3);z-index: -5">
+        <small> This web application was developed solely by John Hammond</small>
+    <div>
 
     </body>
 </html>

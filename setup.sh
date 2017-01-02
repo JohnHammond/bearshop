@@ -44,14 +44,23 @@ function install_dependencies(){
 	apt-get -y install $DEPENDENCIES || panic
 }
 
+
 function create_certificate(){
 
 	echo "$0: ${GREEN}creating HTTPS certificates...${NC}"
-	openssl req -x509 -sha256 -nodes -days 365 -newkey rsa:2048 -keyout $PRIVATEKEY_FILE -out $CERTIFICATE_FILE || panic
+	openssl req -x509 -sha256 -nodes -days 365 -newkey rsa:2048 -keyout $PRIVATEKEY_FILE -out $CERTIFICATE_FILE <<EOF || panic
+US
+CT
+New London
+United States Coast Guard Academy
+Cyber Team
+github.com/JohnHammond
+johnhammond010@gmail.com
+EOF
 
 	sed "0,/\$CERTIFICATE_FILE/{s/\$CERTIFICATE_FILE/$CERTIFICATE_FILE/}" $SERVER_FILE > $NEW_SERVER_FILE || panic
 	sed -i "0,/\$PRIVATEKEY_FILE/{s/\$PRIVATEKEY_FILE/$PRIVATEKEY_FILE/}" $NEW_SERVER_FILE || panic
-	
+
 
 }
 
@@ -61,7 +70,7 @@ function create_database(){
 
 	rm -f $DATABASE
 	sqlite3 $DATABASE < $SCHEMA_FILE || panic
-	chown $CURRENT_USER $DATABASE || panic
+	chown $CURRENT_USER $DATABASE
 	sed -i '0,/\$DATABASE/{s/\$DATABASE/'${DATABASE//\//\\/}'/}' $NEW_SERVER_FILE  || panic
 
 }
