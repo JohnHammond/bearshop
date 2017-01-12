@@ -4,6 +4,9 @@ from flask import Flask
 from flask import render_template, request, session, g, url_for, flash, get_flashed_messages, redirect, send_from_directory
 import sqlite3
 import json
+import math
+import datetime
+import time
 import sys, os
 from colorama import *
 import sys
@@ -14,6 +17,7 @@ from uuid import uuid4
 from textwrap import dedent
 from PIL import Image # needed to resize the image they upload
 import re # Used to verify phone numbers
+
 from resizeimage import resizeimage
 
 # Import smtplib for the actual sending function
@@ -21,6 +25,8 @@ import smtplib
 
 # Import the email modules we'll need
 from email.mime.text import MIMEText
+from email.mime.image import MIMEImage
+from email.mime.multipart import MIMEMultipart
 
 from passlib.hash import sha256_crypt
 from contextlib import closing
@@ -29,6 +35,7 @@ from contextlib import closing
 CERTIFICATE = 'certificate.crt'
 PRIVATE_KEY = 'privateKey.key'
 
+NUMBER_OF_PRODUCTS_ON_A_PAGE = 30
 
 bad_word_found = ""
 
@@ -49,7 +56,7 @@ def contains_bad_word( string ):
 
 price_cap = 10000
 
-debug = True
+debug = False
 
 init( autoreset = True )
 email_from = 'ObjeeTrade'
@@ -70,16 +77,35 @@ else:
 	def error( string ): pass
 	def warning( string ): pass
 
+def get_available_pages( number_of_pages, page_number ):
+	available_pages = range( max(1, page_number-3), page_number )
+	available_pages += range(  page_number, min(number_of_pages+1,page_number+4) )
+			
+	return available_pages
+
 def allowed_file(filename):
-    return '.' in filename and \
-           filename.rsplit('.', 1)[1] in ALLOWED_EXTENSIONS
+    return '.' in filename.lower() and \
+           filename.lower().rsplit('.', 1)[1] in ALLOWED_EXTENSIONS
 
-def send_email( to_address, subject, message ):
+def send_email( to_address, subject, message, attachment = None ):
 
-	msg = MIMEText(message, 'html')
+	msg = MIMEMultipart()
 	msg["Subject"] = subject
 	msg['From'] = email_from
 	msg['To'] = to_address
+
+
+	if ( attachment != None ):
+		
+		try:
+			image = MIMEImage( open(attachment).read(), attachment )
+			msg.attach(image)
+		except IOError:
+			message = message.replace("Picture attached", "THEY DID NOT ADD A PICTURE.");
+
+
+	msg.attach(MIMEText(message, 'html'))
+
 	server = smtplib.SMTP_SSL('smtp.gmail.com', 465)
 	server.ehlo()
 	server.login('objeetrade@gmail.com', 'Go Coast Guard')
@@ -88,7 +114,7 @@ def send_email( to_address, subject, message ):
 
 # ===========================================================================
 
-ALLOWED_EXTENSIONS = set(['png', 'jpg', 'jpeg', 'gif'])
+ALLOWED_EXTENSIONS = set(['png', 'jpg', 'jpeg', 'gif', 'PNG', 'JPG', 'JPEG', 'GIF'])
 DATABASE = 'database.db'
 UPLOAD_FOLDER = 'uploads'
 PRIVATE_KEY = 'privateKey.key'
@@ -256,19 +282,29 @@ def send_verification_link():
 	flash("An e-mail has been sent!")
 	return redirect("verify")
 
-
-@app.route("/products")
-def products():
+@app.route('/products/', defaults={'page_number': 1})
+@app.route("/products/<int:page_number>")
+def products(page_number):
 
 	if not 'logged_in' in session: return redirect('login')
 	cur = g.db.execute('select verified from users where uuid = (?)', [session['uuid']])
 	verified = cur.fetchone()[0]
 	if not verified: 
 		return redirect('verify')
-	cur = g.db.execute('select name, picture, price, uuid from products')
-	products = [ [ row[0], row[1], row[2], row[3] ] for row in cur.fetchall()[::-1]]
+	
+	cur = g.db.execute("select count(*) from products")
+	number_of_products = cur.fetchone()[0]
 
-	return render_template("products.html", products = products)
+	number_of_pages = int(math.ceil(float(number_of_products) / float(NUMBER_OF_PRODUCTS_ON_A_PAGE)))
+	
+	available_pages = get_available_pages(number_of_pages, page_number)	
+
+	cur = g.db.execute('select name, picture, price, uuid from products ORDER BY date DESC limit (?) offset (?) '
+		, [ NUMBER_OF_PRODUCTS_ON_A_PAGE, (page_number-1)*NUMBER_OF_PRODUCTS_ON_A_PAGE ])
+	products = [ [ row[0], row[1], row[2], row[3] ] for row in cur.fetchall()[::-1]]
+	for p in products: p[2] = '$' + format(p[2], '.2f')
+
+	return render_template("products.html", products = products, available_pages=available_pages, page_number = page_number, last_page=number_of_pages)
 
 @app.route("/products/<uuid>")
 def product(uuid):
@@ -279,8 +315,10 @@ def product(uuid):
 	if not verified: 
 		return redirect('verify')
 
-	cur = g.db.execute('select name, price, picture, description, seller, interested_people from products where uuid = (?)', [uuid] )
-	name, price, picture, description, seller, interested_people = cur.fetchone()
+	cur = g.db.execute('select name, price, date, picture, description, seller, interested_people from products where uuid = (?)', [uuid] )
+	name, price, date, picture, description, seller, interested_people = cur.fetchone()
+	price = '$' + format(price, '.2f')
+	date = datetime.datetime.fromtimestamp(date ).strftime('%A, %B %-d, %Y %-I:%M %p')
 
 	cur = g.db.execute('select uuid from users where name = (?)', [seller] )
 	seller_uuid = cur.fetchone()[0]
@@ -288,7 +326,7 @@ def product(uuid):
 
 	interested_people = [ person for person in interested_people.split('\n') if person ]
 
-	return render_template('item.html', name=name, picture=picture, description=description, seller=seller, price=price, uuid=uuid, interested_people =interested_people, seller_uuid = seller_uuid)
+	return render_template('item.html', name=name, picture=picture, description=description, seller=seller, price=price, uuid=uuid, interested_people =interested_people, seller_uuid = seller_uuid, date = date)
 
 @app.route("/remove_product/<uuid>")
 def remove_product(uuid):
@@ -310,7 +348,7 @@ def remove_product(uuid):
 		your_products = cur.fetchone()[0];
 		your_products = your_products.replace(uuid,'')
 		your_products = your_products.strip()
-		print your_products
+		
 		cur = g.db.execute('update users set your_products = (?) where email = (?)', [
 			your_products,
 			session['email']
@@ -356,13 +394,80 @@ def verify():
 
 	return render_template( 'verify.html', identifier = identifier)
 
-@app.route("/search")
+@app.route("/search", methods=["GET", "POST"])
 def search():
 	if not 'logged_in' in session: return redirect('login')
 	cur = g.db.execute('select verified from users where uuid = (?)', [session['uuid']])
 	verified = cur.fetchone()[0]
 	if not verified: 
 		return redirect('verify')
+
+
+	if ( request.method == "POST" ):
+
+		keywords = request.form['keywords']
+		price = request.form['price']
+		seller = request.form['seller']
+
+		if (contains_bad_word(keywords.lower()) or \
+			contains_bad_word(seller.lower()) or \
+			contains_bad_word(price.lower()) ):
+
+			flash("Detected a bad word: '" + bad_word_found + "'. Not accepting that.")
+			return render_template('search.html', keywords=keywords, price=price, seller=seller)
+
+		actual_price = price
+		price = actual_price.replace('<','').replace('>','')
+		if ( price != "" ):
+			if ( '.' in price ):
+				if ( price[-3] != '.' ):
+					flash("That does not look like a valid price!")
+					return render_template('search.html', keywords=keywords, price=price, seller=seller)
+			# try:
+			price_number = round(float(price),2)
+			warning(str(price_number))
+			if (price_number != abs(price_number)):
+				flash("That does not look like a valid price!")
+				return render_template('search.html', keywords=keywords, price=price, seller=seller)
+			elif ( price_number >= price_cap ):
+				flash("Please enter a cost less than $" + str(price_cap))
+				return render_template('search.html', keywords=keywords, price=price, seller=seller)
+		# except:
+				
+				# flash("That does not look like a valid price!")
+				return render_template('search.html', keywords=keywords, price=price, seller=seller)
+
+		keywords = '%' + keywords.replace(' ','%') + '%'
+		seller = '%' + seller.replace(' ','%') + '%'
+
+		query = 'select name, picture, price, uuid from products where (description like (?) or name like (?) )'
+		add_on = ' COLLATE utf8_general_ci ORDER BY date DESC'
+		if ( price != "" ):
+			query += " and ( price = (?) )"
+			if ( '>' in actual_price ): query = query.replace('=', '>')
+			if ( '<' in actual_price ): query = query.replace('=', '<')
+			
+			if ( seller != "" ):
+				
+				query += " and ( seller like (?) )"
+				cur = g.db.execute(query + add_on, [ keywords, keywords, price, seller ])
+			else:
+				cur = g.db.execute(query + add_on, [ keywords, keywords, price ])
+		else:
+			if ( seller != "" ):
+				
+				query += " and ( seller like (?) )"
+				cur = g.db.execute(query + add_on, [ keywords, keywords, seller ])
+			else:
+				cur = g.db.execute(query + add_on, [ keywords, keywords ])
+		
+		products = [ [ row[0], row[1], row[2], row[3] ] for row in cur.fetchall()[::-1]]
+
+		for p in products: p[2] = '$' + format(p[2], '.2f')
+
+		return render_template("search_results.html", products = products)
+
+
 	return render_template("search.html")
 
 
@@ -377,10 +482,11 @@ def edit(uuid):
 	if ( request.method == "GET" ):
 
 		
-		cur = g.db.execute('select name, price, picture, description, seller from products where uuid = (?)', [uuid] )
+		cur = g.db.execute('select name, price, picture, description, seller from products where uuid = (?) ORDER BY date', [uuid] )
 		name, price, picture, description, seller = cur.fetchone()
+		price = format(price, '.2f')
 
-		return render_template('edit.html', name=name, picture=picture, description=description, seller=seller, price=price[1:], uuid=uuid)
+		return render_template('edit.html', name=name, picture=picture, description=description, seller=seller, price=price, uuid=uuid)
 	
 	if ( request.method == "POST" ):
 		
@@ -401,65 +507,77 @@ def edit(uuid):
 				contains_bad_word(name.lower())
 			):
 				flash("Detected a bad word: '" + bad_word_found + "'. Not accepting that.")
-				return redirect(url_for('edit', uuid=uuid))
+				return render_template("edit.html", uuid=uuid, price = price, name = name, description = description, picture=picture, seller = product_seller)
+
 
 			if ( name == "" ):
 				flash("Please enter a name of the product!")
-				return redirect(url_for('edit', uuid=uuid))
+			
+				return render_template("edit.html", uuid=uuid, price = price, name = name, description = description, picture=picture, seller = product_seller)
 
 			elif ( price == "" ):
 				flash("Please enter the price of the product in dollars!")
-				return redirect(url_for('edit', uuid=uuid))
+				return render_template("edit.html", uuid=uuid, price = price, name = name, description = description, picture=picture, seller = product_seller)
 			elif ( description == "" ):
 					flash("Please enter a description of your product!")
-					return redirect(url_for('edit', uuid=uuid))
+					return render_template("edit.html", uuid=uuid, price = price, name = name, description = description, picture=picture, seller = product_seller)
 			elif ( '.' in price ):
 				if ( price[-3] != '.' ):
 					flash("That does not look like a valid price!")
-					return redirect(url_for('edit', uuid=uuid))
-			try:
-				price_number = round(float(price),2)
-				warning(str(price_number))
-				if (price_number != abs(price_number)):
-					flash("That does not look like a valid price!")
-					return redirect(url_for('edit', uuid=uuid))
-				elif ( price_number >= price_cap ):
-					flash("Please enter a cost less than $" + str(price_cap))
-					return redirect(url_for('edit', uuid=uuid))
-				else:
-					# We should be good to process the form
-					price_number = '$' + format(price_number, '.2f')
+					return render_template("edit.html", uuid=uuid, price = price, name = name, description = description, picture=picture, seller = product_seller)
+			# try:
 
-					if 'picture' not in request.files:
-						pass # They don't have to update the picture
-					else:
-						file = request.files['picture']
-
-						if file and allowed_file(file.filename):
-							filename = secure_filename(str(uuid4()) + "." + file.filename.split('.')[-1])
-							save_location = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-							file.save(save_location)
-							p = Image.open(save_location)
-							try:
-								p = resizeimage.resize_cover(p, (350, 350))
-							except:
-								pass
-							p.save(save_location)
-							# return redirect(url_for('uploaded_file', filename=filename))
-							picture = (url_for('uploaded_file', filename=filename))
-
-						cur = g.db.execute("update products set name = (?), picture = (?), description = (?), price = (?) where uuid = (?)", [
-									name,
-									str(picture),
-									description, 
-									price_number,
-									uuid
-								] );
-						g.db.commit()
-			except:
-				# print price
+			price_number = round(float(price),2)
+			warning(str(price_number))
+			if (price_number != abs(price_number)):
 				flash("That does not look like a valid price!")
-				return redirect(url_for('edit', uuid=uuid))
+				return render_template("edit.html", uuid=uuid, price = price, name = name, description = description, picture=picture, seller = product_seller)
+			elif ( price_number >= price_cap ):
+				flash("Please enter a cost less than $" + str(price_cap))
+				return render_template("edit.html", uuid=uuid, price = price, name = name, description = description, picture=picture, seller = product_seller)
+			else:
+				# We should be good to process the form
+
+				if 'picture' not in request.files:
+					pass # They don't have to update the picture
+				else:
+					file = request.files['picture']
+
+					if file and allowed_file(file.filename.lower()):
+						filename = secure_filename(str(uuid4()) + "." + file.filename.split('.')[-1])
+						save_location = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+						file.save(save_location)
+						p = Image.open(save_location)
+						try:
+							p = resizeimage.resize_cover(p, (350, 350))
+						except:
+							# flash("Couldn't handle your picture. Try something smaller!")
+							pass
+						p.save(save_location)
+						
+						picture = (url_for('uploaded_file', filename=filename))
+
+					date = int(time.time())
+					
+
+					cur = g.db.execute("update products set name = (?), picture = (?), description = (?), price = (?), date = (?) where uuid = (?)", [
+								name,
+								str(picture),
+								description, 
+								price_number,
+								date,
+								uuid
+							] );
+
+					g.db.commit()
+
+					send_email("johnhammond010@gmail.com", "New Product on ObjeeTrade", 
+					render_template("new_product.html", name= session['name'], product_name = name, price = price, description = description ),
+					os.getcwd() + picture )  
+			# except:
+				
+			# 	flash("That does not look like a valid price!")
+			# 	return render_template("edit.html", uuid=uuid, price = price, name = name, description = description, picture=picture, seller = product_seller)
 
 		else:
 			flash("This is not your own product!")
@@ -482,7 +600,7 @@ def profile(uuid):
 	your_products = your_products.split(" ")
 	products = []
 	for product in your_products:
-		cur = g.db.execute('select name from products where uuid = (?)', [product])
+		cur = g.db.execute('select name from products where uuid = (?) ORDER BY date DESC', [product])
 		product_name = cur.fetchone()
 		if product_name != None: 
 			product_name = product_name[0]
@@ -570,44 +688,49 @@ def sell():
 		name = request.form['name']
 		price = request.form['price']
 		description = request.form['description']
+		if 'picture' not in request.files:
+			picture=""
+		else:
+			picture = request.files['picture']
+
+
 		if 	( contains_bad_word(price.lower()) or \
 				contains_bad_word(description.lower()) or \
 				contains_bad_word(name.lower())
 		):
 			flash("Detected a bad word: '" + bad_word_found + "'. Not accepting that.")
-			return render_template("sell.html", name=name, price = price, description = description)
+			return render_template("sell.html", name=name, price = price, description = description, picture=picture)
 
 		if ( name == "" ):
 			flash("Please enter a name of the product!")
-			return render_template("sell.html", name=name, price = price, description = description)
+			return render_template("sell.html", name=name, price = price, description = description, picture=picture)
 		elif ( price == "" ):
 			flash("Please enter the price of the product in dollars!")
-			return render_template("sell.html", name=name, price = price, description = description)
+			return render_template("sell.html", name=name, price = price, description = description, picture=picture)
 		elif ( description == "" ):
 				flash("Please enter a description of your product!")
-				return render_template("sell.html", name=name, price = price, description = description)
+				return render_template("sell.html", name=name, price = price, description = description, picture=picture)
 		elif ( '.' in price ):
 			if ( price[-3] != '.' ):
 				flash("That does not look like a valid price!")
-				return render_template("sell.html", name=name, price = price, description = description)
-		try:
-			price_number = round(float(price),2)
-			warning(str(price_number))
-		except:
-			print price
-			flash("That does not look like a valid price!")
-			return render_template("sell.html", name=name, price = price, description = description)
+				return render_template("sell.html", name=name, price = price, description = description, picture=picture)
+		# try:
+		price_number = round(float(price),2)
+		
+		# except:
+			
+			# flash("That does not look like a valid price!")
+			# return render_template("sell.html", name=name, price = price, description = description, picture=picture)
 
 		if (price_number != abs(price_number)):
 			flash("That does not look like a valid price!")
-			return render_template("sell.html", name=name, price = price, description = description)
+			return render_template("sell.html", name=name, price = price, description = description, picture=picture)
 		elif ( price_number >= price_cap ):
 			flash("Please enter a cost less than $" + str(price_cap))
-			return render_template("sell.html", name=name, price = price, description = description)
+			return render_template("sell.html", name=name, price = price, description = description, picture=picture)
 
 		else:
 			# We should be good to process the form
-			price_number = '$' + format(price_number, '.2f')
 
 			if 'picture' not in request.files:
 				pass # We make it optional for them to upload files, remember?
@@ -622,19 +745,22 @@ def sell():
 					try:
 						p = resizeimage.resize_cover(p, (350, 350))
 					except:
+						# The image is small already; we don;t have to convert it.
 						pass
 					p.save(save_location)
 					# return redirect(url_for('uploaded_file', filename=filename))
 					picture = (url_for('uploaded_file', filename=filename))
 
 			uuid = str(uuid4())
-			cur = g.db.execute('insert into products (name, picture, description, price, seller, interested_people, uuid) values ( ?, ?, ?, ?, ?, ?, ? )', [ 
+			date = int(time.time())
+			cur = g.db.execute('insert into products (name, picture, description, date, price, seller, interested_people, uuid) values ( ?, ?, ?, ?, ?, ?, ?, ? )', [ 
 		               name,
 		               str(picture),
-		               description, 
-		               price_number, # Since you are just selling this product, no one is interested yet!
+		               description,
+		               date,
+		               price_number, 
 		               session['name'],
-		               "",
+		               "", # Since you are just now selling this product, no one is interested yet!
 		               uuid
 				  ] );
 
@@ -643,16 +769,27 @@ def sell():
 			your_products = cur.fetchone()[0];
 			your_products += ' ' + uuid
 			your_products = your_products.strip()
-			print your_products
+			
 			cur = g.db.execute('update users set your_products = (?) where email = (?)', [
 				your_products,
 				session['email']
 			])
 			g.db.commit()
 
+			# def send_email( to_address, subject, message, attachment = None ):
+			
+			if ( repr(type(picture)) == "<class 'werkzeug.datastructures.FileStorage'>" ):
+				send_email("johnhammond010@gmail.com", "New Product on ObjeeTrade", 
+				render_template("new_product.html", name= session['name'], product_name = name, price = str(price), description = description ),
+			   )  				
+			else:
+				send_email("johnhammond010@gmail.com", "New Product on ObjeeTrade", 
+				render_template("new_product.html", name= session['name'], product_name = name, price = str(price), description = description ),
+			 os.getcwd() + picture )  
+
 			return redirect('products')
 
-	return render_template("sell.html", name=name, price = price, description = description)
+	return render_template("sell.html", name=name, price = price, description = description, picture=picture)
 
 @app.route("/log_out", methods=["GET", "POST"])
 def log_out():
@@ -675,15 +812,13 @@ def session_logout():
 
 	flash("You have been successfully logged out.")
 
-	session.pop('logged_in')
-	session.pop('email')
-	session.pop('uuid')
-	session.pop('name')
-
-	
+	if session.has_key('logged_in'): 	session.pop('logged_in')
+	if session.has_key('email'): 		session.pop('email')
+	if session.has_key('uuid'): 		session.pop('uuid')
+	if session.has_key('name'): 		session.pop('name')
 
 if ( __name__ == "__main__" ):
 
 	context = (CERTIFICATE, PRIVATE_KEY)
-	app.run( host="0.0.0.0", debug=True, ssl_context=context, port = 444, threaded = True )
+	app.run( host="0.0.0.0", debug=True, ssl_context=context, port = 443, threaded = True )
 	

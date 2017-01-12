@@ -2,18 +2,54 @@
 {% block content %}
 
 
-    <div id="login_box_background"></div>
-    <div id="login_box">
-    
+    <!-- <div id="login_box_background"></div> -->
+    <div id="vertical">
+    <!-- 
         {% for message in get_flashed_messages() %}
             <p class='flashed_messages'><{{message}}</p>
         {% endfor %}
-    
-            <h2 style="color:silver; text-align:center">
-                Unfortunately this feature is not yet available.
-            </h2>
+ -->
+		<h1> Search for a Product </h1>    
 
+        <div id="sell_box">
+            <form method="POST">
+                
+                <p>
+                All of the fields below are optional. Note that results are not "paged," so all of the results (no matter how many there are!) will be presented all at once. 
+                </p>
+
+                <p>
+                	You can search by keywords, separated by spaces. These will be matched in both the name and the description of the product.
+                </p>
+                
+                <input type="text" name="keywords" placeholder="Keywords" value="{{keywords}}">
+                
+                <p>
+                You can use special operators in the price to denote price greater than or less than, like <code> &lt; 20 </code> or 
+                	<code> &gt; 5</code>.
+                </p>
+                
+                <input style="color:darkgreen" type="text" name="price" placeholder="Price $" value="{{price}}">
+
+                <p> If you know the name of the seller (the one given in their e-mail), you can narrow your search here. </p>
+                <input type="text" name="seller" placeholder="Seller Name" value="{{seller}}">
+                <p></p>
+
+                
+                <p style="padding: 0px 50px">
+                	
+                </p>
+
+                <input type="submit" value="SEARCH" style="font-size:xx-large" id="blue_button">
+            </form>
+        </div>
+
+        <!-- <h2 style="color:silver; text-align:center">
+            Unfortunately this feature is not yet available.
+        </h2> -->
 
     </div>
+
+
 {% endblock %}
     

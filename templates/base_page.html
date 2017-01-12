@@ -10,6 +10,7 @@
         <script src="{{ url_for('static', filename='js/notify.js' ) }}"></script>
         <script src="{{ url_for('static', filename='js/jquery-ui.min.js' ) }}"></script>
         <script src="{{ url_for('static', filename='js/control.js' ) }}"></script>
+        <link href="https://fonts.googleapis.com/css?family=Roboto+Slab" rel="stylesheet"> 
     </head>
     <body>
 
@@ -19,7 +20,7 @@
             <!-- {{ session.name }} -->
             <ul>
                 <li> <a href="{{url_for('log_out')}}">LOG OUT</a> </li>
-                <!-- <li> <a href="{{url_for('search')}}">SEARCH</a> </li> -->
+                <li> <a href="{{url_for('search')}}">SEARCH</a> </li>
                 <li> <a href="{{url_for('sell')}}">SELL</a> </li>
                 <li> <a href="{{url_for('products')}}">SALES</a> </li>
             </ul>
@@ -36,7 +37,12 @@
     {% endblock %}
 
     <div style="position:fixed;bottom:10px;width:100%;text-align:center;color:rgba(0,0,0,.3);z-index: -5">
-        <small> This web application was developed solely by John Hammond</small>
+        <small> 
+            This web application was developed entirely by John Hammond.
+            The original proposal was brought forth by 
+            <a style="color:gray; text-decoration: underline;" href="{{ url_for('static', filename='objeetrade_memo.pdf' ) }}">Will Colomb</a>.
+
+        </small>
     <div>
 
     </body>

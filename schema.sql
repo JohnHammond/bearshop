@@ -17,7 +17,8 @@ create table products (
   name text not null,
   picture text not null,
   description text not null,
-  price text not null,
+  date int not null,
+  price real not null,
   seller text not null,
   interested_people text not null,
   uuid text not null

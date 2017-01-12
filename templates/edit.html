@@ -26,8 +26,19 @@
             <input type="submit" value="SAVE CHANGES" style="font-size:xx-large" id="green_button">
         </form>
 
-        <a href="{{ url_for('remove_product', uuid=uuid)}}"><span id="red_button_link">  REMOVE PRODUCT </span></a>
+        <!-- <a href="{{ url_for('remove_product', uuid=uuid)}}"><span id="red_button_link">  REMOVE PRODUCT </span></a> -->
+        <span id="red_button_link">  REMOVE PRODUCT </span>
 
+        <script>
+        $('#red_button_link').click(function(){
+
+            if (confirm('Are you sure you would like to remove this product?')) {
+                document.location = "{{ url_for('remove_product', uuid=uuid)}}"
+            } else {
+                // Do nothing!
+            }
+        });
+        </script>
 
     </div>
 {% endblock %}

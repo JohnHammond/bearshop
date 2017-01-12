@@ -3,12 +3,46 @@
 
 
     <!-- <div id="login_box_background"></div> -->
+
+
     <div id="vertical">
         
+        <div class="page_navigation">
+            
+            <b>Page: </b>
+
+                <a href="{{url_for('products' )}}">
+                    <span class="page_button">First</span>
+                </a>
+
+                {% for page in available_pages %}
+                    {% if page == page_number %}
+                    
+                    <a href="{{url_for('products', page_number=page )}}">
+                        <span class="page_button" style="border-color:black;color:black;text-decoration: underline;">{{ page }}</span>
+                    </a>
+                    
+                    {% else %}
+                    <a href="{{url_for('products', page_number=page )}}">
+                        <span class="page_button"> {{ page }}</span>
+                    </a>
+                    
+                    {% endif %}
+
+                {% endfor %}
+
+                <a href="{{url_for('products', page_number = last_page )}}">
+                    <span class="page_button">Last</span>
+                </a>
+            
+            <br><br>
+
+        </div>
+
         <div style="text-align:center">
         {% if products|length == 0 %}
-            <h2 style="color:silver; text-align:center">
-                There is currently nothing for sale. :(
+            <h2 style="color:gray; text-align:center">
+                There is currently nothing for sale :(
             </h2>
         {% else %}
             {% for product in products %}
@@ -22,6 +56,37 @@
 
             </div>
         
+        <div class="page_navigation">
+            
+            <br><br>
+
+            <b>Page: </b>
+
+                <a href="{{url_for('products' )}}">
+                    <span class="page_button">First</span>
+                </a>
+
+                {% for page in available_pages %}
+                    {% if page == page_number %}
+                    
+                    <a href="{{url_for('products', page_number=page )}}">
+                        <span class="page_button" style="border-color:black;color:black;text-decoration: underline;">{{ page }}</span>
+                    </a>
+                    
+                    {% else %}
+                    <a href="{{url_for('products', page_number=page )}}">
+                        <span class="page_button"> {{ page }}</span>
+                    </a>
+
+                    {% endif %}
+                    
+                {% endfor %}
+
+                <a href="{{url_for('products', page_number = last_page )}}">
+                    <span class="page_button">Last</span>
+                </a>
+        </div>
+
     </div>
 {% endblock %}
     
